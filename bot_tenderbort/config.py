@@ -1,4 +1,4 @@
-# config.py
+import os
 
-BOT_TOKEN = "BOT_TOKEN"
-ADMIN_ID = "ADMIN_ID"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
