@@ -7,16 +7,6 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # таблица пользователей
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        telegram_id INTEGER UNIQUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    # таблица транзакций
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,27 +18,38 @@ def init_db():
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
-    import sqlite3
 
-DB_NAME = "finance.db"
+    conn.commit()
+    conn.close()
 
 
-def add_transaction(user_id, amount, tx_type, category, description):
+def add_transaction(
+    user_id,
+    amount,
+    tx_type,
+    category,
+    description
+):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO transactions (user_id, amount, type, category, description)
+        INSERT INTO transactions
+        (user_id, amount, type, category, description)
         VALUES (?, ?, ?, ?, ?)
-    """, (user_id, amount, tx_type, category, description))
+    """, (
+        user_id,
+        amount,
+        tx_type,
+        category,
+        description
+    ))
 
     conn.commit()
     conn.close()
 
-    conn.commit()
-    conn.close()
 
-   def get_balance(user_id):
+def get_balance(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -72,38 +73,42 @@ def add_transaction(user_id, amount, tx_type, category, description):
 
     return balance
 
-    def get_stats(user_id):
+
+def get_stats(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # доходы
     cursor.execute("""
         SELECT SUM(amount)
         FROM transactions
-        WHERE user_id = ? AND type = 'income'
+        WHERE user_id = ?
+        AND type = 'income'
     """, (user_id,))
 
     income = cursor.fetchone()[0] or 0
 
-    # расходы
     cursor.execute("""
         SELECT SUM(amount)
         FROM transactions
-        WHERE user_id = ? AND type = 'expense'
+        WHERE user_id = ?
+        AND type = 'expense'
     """, (user_id,))
 
     expense = cursor.fetchone()[0] or 0
 
     conn.close()
 
-    balance = income - expense
-
     return {
         "income": income,
         "expense": expense,
-        "balance": balance
+        "balance": income - expense
     }
-    def get_last_transactions(user_id, limit=5):
+
+
+def get_last_transactions(
+    user_id,
+    limit=5
+):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
@@ -121,15 +126,16 @@ def add_transaction(user_id, amount, tx_type, category, description):
 
     return transactions
 
-    def get_category_stats(user_id):
 
+def get_category_stats(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT category, SUM(amount)
         FROM transactions
-        WHERE user_id = ? AND type = 'expense'
+        WHERE user_id = ?
+        AND type = 'expense'
         GROUP BY category
         ORDER BY SUM(amount) DESC
     """, (user_id,))
