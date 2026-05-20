@@ -121,8 +121,11 @@ async def main():
 if name == "__main__":
     asyncio.run(main())
     async def main():
-    init_db()  # <-- создаём таблицы при запуске
-    print("Бот запущен...")
+    init_db()
+
+    bot = Bot(token=BOT_TOKEN)
+    dp = Dispatcher()
+
     await dp.start_polling(bot)
 
      @dp.message(lambda message: message.text == "💳 Баланс")
