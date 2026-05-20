@@ -120,7 +120,7 @@ async def main():
 
 if name == "__main__":
     asyncio.run(main())
-    async def main():
+async def main():
     init_db()
 
     bot = Bot(token=BOT_TOKEN)
